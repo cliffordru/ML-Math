@@ -1,4 +1,5 @@
 from perceptron import predict_obesity, load_model, train_model
+from typing import List, Tuple
 
 print("Obesity Prediction Program")
 print("-" * 25)
@@ -15,7 +16,7 @@ else:
     print("Loaded saved model successfully!")
 
 # Now let's make some predictions with different cases
-test_cases = [
+test_cases: List[Tuple[float, float]] = [
     (70, 160),    # 5'10", 160 lbs
     (65, 190),    # 5'5", 190 lbs
     (72, 200),    # 6'0", 200 lbs
@@ -28,6 +29,6 @@ print("Height(in) Weight(lbs)  Prediction")
 print("-" * 35)
 
 for height, weight in test_cases:
-    prediction = predict_obesity(height, weight)
-    status = "Obese" if prediction == 1 else "Not Obese"
+    prediction: int = predict_obesity(height, weight)
+    status: str = "Obese" if prediction == 1 else "Not Obese"
     print(f"{height:^8} {weight:^10}  {status}")
