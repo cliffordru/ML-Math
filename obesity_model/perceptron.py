@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 import json
 from typing import Tuple, List, Optional, Dict, Union, Any
+from pathlib import Path
+
+# Get the current directory
+CURRENT_DIR = Path(__file__).parent
 
 # Global variables to store model parameters
 w1: float = 0
@@ -9,6 +13,66 @@ w2: float = 0
 b: float = 0
 data_mean: Optional[np.ndarray] = None
 data_std: Optional[np.ndarray] = None
+
+def save_model(filename: str = 'model_parameters.json') -> bool:
+    """
+    Save the model parameters to a file
+    
+    Args:
+        filename: Path to save the model parameters
+        
+    Returns:
+        bool: True if save was successful, False otherwise
+    """
+    global w1, w2, b, data_mean, data_std
+    
+    # Check if model parameters exist
+    if data_mean is None or data_std is None:
+        print("Error: Model parameters not initialized. Please train the model first.")
+        return False
+        
+    try:
+        model_params: Dict[str, Union[float, List[float]]] = {
+            'w1': w1,
+            'w2': w2,
+            'b': b,
+            'data_mean': data_mean.tolist(),
+            'data_std': data_std.tolist()
+        }
+        filepath = CURRENT_DIR / filename
+        with open(filepath, 'w') as f:
+            json.dump(model_params, f)
+        print(f"Model successfully saved to {filepath}")
+        print(f"Parameters: w1={w1:.4f}, w2={w2:.4f}, b={b:.4f}")
+        return True
+    except Exception as e:
+        print(f"Error saving model: {str(e)}")
+        return False
+
+def load_model(filename: str = 'model_parameters.json') -> bool:
+    """
+    Load the model parameters from a file
+    
+    Args:
+        filename: Path to the model parameters file
+        
+    Returns:
+        bool: True if load was successful, False otherwise
+    """
+    global w1, w2, b, data_mean, data_std
+    try:
+        filepath = CURRENT_DIR / filename
+        with open(filepath, 'r') as f:
+            model_params: Dict[str, Any] = json.load(f)
+        w1 = model_params['w1']
+        w2 = model_params['w2']
+        b = model_params['b']
+        data_mean = np.array(model_params['data_mean'])
+        data_std = np.array(model_params['data_std'])
+        return True
+    except FileNotFoundError:
+        print(f"No saved model found at {filepath}")
+        return False
 
 def train_model() -> bool:
     """
@@ -19,7 +83,8 @@ def train_model() -> bool:
     """
     global w1, w2, b, data_mean, data_std
     # Load and prepare the data
-    data: pd.DataFrame = pd.read_csv('data.csv')
+    data_path = CURRENT_DIR / 'data.csv'
+    data: pd.DataFrame = pd.read_csv(data_path)
 
     # Normalize the features (height and weight) to help with convergence
     X: np.ndarray = data[['height_in', 'weight_lbs']].values
@@ -95,7 +160,8 @@ def predict_obesity(height: float, weight: float) -> int:
 
 def test_model() -> None:
     """Test the model on the training data and print results"""
-    data: pd.DataFrame = pd.read_csv('data.csv')
+    data_path = CURRENT_DIR / 'data.csv'
+    data: pd.DataFrame = pd.read_csv(data_path)
     X: np.ndarray = data[['height_in', 'weight_lbs']].values
     X = (X - data_mean) / data_std  # standardize features
     y: np.ndarray = data['obese'].values
@@ -119,64 +185,6 @@ def test_model() -> None:
 
     accuracy: float = correct / len(X) * 100
     print(f"\nAccuracy: {accuracy:.2f}%")
-
-def save_model(filename: str = 'model_parameters.json') -> bool:
-    """
-    Save the model parameters to a file
-    
-    Args:
-        filename: Path to save the model parameters
-        
-    Returns:
-        bool: True if save was successful, False otherwise
-    """
-    global w1, w2, b, data_mean, data_std
-    
-    # Check if model parameters exist
-    if data_mean is None or data_std is None:
-        print("Error: Model parameters not initialized. Please train the model first.")
-        return False
-        
-    try:
-        model_params: Dict[str, Union[float, List[float]]] = {
-            'w1': w1,
-            'w2': w2,
-            'b': b,
-            'data_mean': data_mean.tolist(),
-            'data_std': data_std.tolist()
-        }
-        with open(filename, 'w') as f:
-            json.dump(model_params, f)
-        print(f"Model successfully saved to {filename}")
-        print(f"Parameters: w1={w1:.4f}, w2={w2:.4f}, b={b:.4f}")
-        return True
-    except Exception as e:
-        print(f"Error saving model: {str(e)}")
-        return False
-
-def load_model(filename: str = 'model_parameters.json') -> bool:
-    """
-    Load the model parameters from a file
-    
-    Args:
-        filename: Path to the model parameters file
-        
-    Returns:
-        bool: True if load was successful, False otherwise
-    """
-    global w1, w2, b, data_mean, data_std
-    try:
-        with open(filename, 'r') as f:
-            model_params: Dict[str, Any] = json.load(f)
-        w1 = model_params['w1']
-        w2 = model_params['w2']
-        b = model_params['b']
-        data_mean = np.array(model_params['data_mean'])
-        data_std = np.array(model_params['data_std'])
-        return True
-    except FileNotFoundError:
-        print(f"No saved model found at {filename}")
-        return False
 
 if __name__ == '__main__':
     # Train the model when the script is run directly
