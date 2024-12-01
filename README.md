@@ -1,5 +1,7 @@
 # ML-Math Project
 
+[GrayTechnology.com/blog](https://graytechnology.com/blog) - Need an AI, machine learning or data architect / engineer or technology leader? I'm available - info@graytechnology.com
+
 A collection of machine learning implementations for mathematical concepts.
 
 ## Projects
