@@ -1,3 +1,15 @@
-from .perceptron import predict_obesity, train_model, load_model, test_model
+"""
+Obesity classification package using perceptron model.
+"""
 
-__all__ = ['predict_obesity', 'train_model', 'load_model', 'test_model']
+from .model import Perceptron, BinaryClassifier
+from .data_handler import ObesityDataset
+from .train import train_obesity_model, evaluate_model
+
+__all__ = [
+    'Perceptron',
+    'BinaryClassifier',
+    'ObesityDataset',
+    'train_obesity_model',
+    'evaluate_model'
+]
